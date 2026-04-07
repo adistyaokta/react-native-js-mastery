@@ -1,9 +1,9 @@
-import { styled } from 'nativewind';
 import React from 'react';
 import { Text } from 'react-native';
 import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context';
+import { withUniwind } from 'uniwind';
 
-const SafeAreaView = styled(RNSafeAreaView);
+const SafeAreaView = withUniwind(RNSafeAreaView);
 
 const Subscription = () => {
   return (

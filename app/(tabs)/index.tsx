@@ -4,23 +4,24 @@ import UpcomingSubscriptionCard from '@/components/UpcomingSubscriptionCard';
 import {
   HOME_BALANCE,
   HOME_SUBSCRIPTION,
-  HOME_USER,
   UPCOMING_SUBSCRIPTION,
 } from '@/constants/data';
 import '@/global.css';
+import { authClient } from '@/lib/auth-client';
 import { formatIDR } from '@/lib/utils';
 import dayjs from 'dayjs';
 import { StatusBar } from 'expo-status-bar';
 import { Plus } from 'lucide-react-native';
-import { styled } from 'nativewind';
 import { useState } from 'react';
 import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context';
+import { withUniwind } from 'uniwind';
 
-const SafeAreaView = styled(RNSafeAreaView);
+const SafeAreaView = withUniwind(RNSafeAreaView);
 
 export default function Index() {
   const [expandedSubId, setExpandedSubId] = useState<string | null>(null);
+  const { data: session, isPending } = authClient.useSession();
 
   return (
     <SafeAreaView className='flex-1 gap-4 bg-background p-5'>
@@ -39,7 +40,7 @@ export default function Index() {
                   Welcome back
                 </Text>
                 <Text className='text-primary text-lg font-sans-semibold'>
-                  {HOME_USER.name}
+                  {session?.user.name || 'Guest'}
                 </Text>
               </View>
               <View className='ml-auto aspect-square rounded-full bg-white border border-border w-12 h-12 items-center justify-center'>
@@ -115,7 +116,6 @@ export default function Index() {
             No Subscription.
           </Text>
         )}
-        contentContainerClassName='pb-20'
       />
     </SafeAreaView>
   );
