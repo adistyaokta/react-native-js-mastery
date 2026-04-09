@@ -9,10 +9,12 @@ export default function AuthScreen() {
   const { data: session, isPending } = authClient.useSession();
 
   const handleSignIn = async () => {
-    await authClient.signIn.email({
+    const res = await authClient.signIn.email({
       email: 'agaresking@gmail.com',
       password: 'Agares123',
     });
+
+    return res;
   };
 
   const handleSignOut = async () => {
