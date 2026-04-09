@@ -43,12 +43,10 @@
         "expo-font",
         {
           "fonts": [
-            "./assets/fonts/PlusJakartaSans-Regular",
-            "./assets/fonts/PlusJakartaSans-Bold",
-            "./assets/fonts/PlusJakartaSans-Medium",
-            "./assets/fonts/PlusJakartaSans-SemiBold",
-            "./assets/fonts/PlusJakartaSans-ExtraBold",
-            "./assets/fonts/PlusJakartaSans-Light"
+            "./assets/fonts/PlusJakartaSans-Regular.ttf",
+            "./assets/fonts/Roboto-Medium.ttf",
+            "./assets/fonts/Roboto-Bold.ttf",
+            "./assets/fonts/FiraCode-Regular.ttf"
           ]
         }
       ],

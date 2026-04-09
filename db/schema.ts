@@ -1,4 +1,5 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import * as crypto from 'expo-crypto';
 
 export const menus = sqliteTable('menus', {
   id: text('id')
@@ -49,5 +50,6 @@ export const orderItems = sqliteTable('order_items', {
 });
 
 export type Menu = typeof menus.$inferSelect;
+export type AddMenu = typeof menus.$inferInsert;
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;

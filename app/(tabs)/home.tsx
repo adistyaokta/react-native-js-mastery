@@ -1,93 +1,82 @@
-import AddMenuModal from '@/components/AddMenuModal';
-import { db } from '@/db';
-import { Menu, menus } from '@/db/schema';
-import { desc } from 'drizzle-orm';
+import MenuItemList from '@/components/MenuItemList';
+import MenuItemModal from '@/components/MenuModal';
+import { getMenus } from '@/db/queries/menus/menu';
+import { Menu } from '@/db/schema';
+import { useTheme } from '@/lib/colors';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Plus } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { FlatList, Pressable as RNPressable, Text, View } from 'react-native';
 import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
 
 const SafeAreaView = withUniwind(RNSafeAreaView);
+const Pressable = withUniwind(RNPressable);
 
 const Home = () => {
-  const [menuList, setMenuList] = useState<Menu[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const colors = useTheme();
+  const { data, error } = useLiveQuery(getMenus());
 
   const [showModal, setShowModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Partial<Menu> | null>(null);
 
-  useEffect(() => {
-    const loadMenus = async () => {
-      setIsLoading(true);
-      try {
-        const data = await db.select().from(menus).orderBy(desc(menus.id));
-
-        setMenuList(data);
-      } catch (error) {
-        console.error('Failed to load menus', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadMenus();
+  const handleOpenAdd = useCallback(() => {
+    setSelectedItem(null);
+    setShowModal(true);
   }, []);
 
-  const renderProduct = ({ item }: { item: Menu }) => (
-    <View className='mb-3 p-4 bg-muted rounded-lg shadow-sm flex-row justify-between'>
-      <Text className='text-foreground font-bold'>{item.name}</Text>
-      <Text className='text-foreground'>
-        {item.price.toLocaleString('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-          minimumFractionDigits: 2,
-        })}
+  const handleOpenEdit = useCallback((item: Menu) => {
+    setSelectedItem(item);
+    setShowModal(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setSelectedItem(null);
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Menu }) => (
+      <MenuItemList item={item} onItemPressed={handleOpenEdit} />
+    ),
+    [handleOpenEdit],
+  );
+
+  const renderEmptyList = useCallback(
+    () => (
+      <Text className='text-foreground text-center mt-10'>
+        No products found.
       </Text>
-    </View>
+    ),
+    [],
   );
 
   return (
     <SafeAreaView className='flex-1 bg-background gap-4 p-5'>
       <View className='flex flex-row items-center justify-between'>
         <Text className='text-foreground text-2xl font-sans-bold'>Menu</Text>
-        <TouchableOpacity
-          className='bg-foreground rounded-full aspect-square flex items-center justify-center size-10'
-          onPress={() => {
-            setShowModal(true);
-          }}
+        <Pressable
+          className='bg-foreground rounded-full aspect-square flex items-center justify-center size-10 active:opacity-80'
+          onPress={handleOpenAdd}
         >
-          <Plus />
-        </TouchableOpacity>
+          <Plus color={colors.background} />
+        </Pressable>
       </View>
 
-      {isLoading ? (
-        <ActivityIndicator size='large' className='mt-10' />
-      ) : (
-        <FlatList
-          data={menuList}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderProduct}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          ListEmptyComponent={
-            <Text className='text-foreground text-center mt-10'>
-              No products found.
-            </Text>
-          }
-        />
-      )}
+      <FlatList
+        data={data}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerClassName='flex flex-col gap-2'
+        keyboardShouldPersistTaps='handled'
+        ListEmptyComponent={renderEmptyList}
+      />
 
-      <AddMenuModal
-        onAdd={({ name, price }) => {
-          console.log(name, price);
-        }}
-        onClose={() => setShowModal(false)}
+      <MenuItemModal
         visible={showModal}
+        item={selectedItem}
+        onClose={handleCloseModal}
       />
     </SafeAreaView>
   );
